@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CampusEvents – College Event Management System</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f7fb;--card:#fff;--text:#1b1f2a;--muted:#667085;--accent:#4f46e5;--accent2:#eef0ff;--border:#e4e7ec;--ok:#12805c;--bad:#c0392b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1117;--card:#181b24;--text:#eceef4;--muted:#9aa1b2;--accent:#818cf8;--accent2:#23264a;--border:#2a2e3b;--ok:#4ade80;--bad:#f87171}}
+:root[data-theme="dark"]{--bg:#0f1117;--card:#181b24;--text:#eceef4;--muted:#9aa1b2;--accent:#818cf8;--accent2:#23264a;--border:#2a2e3b;--ok:#4ade80;--bad:#f87171}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+header{background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.wrap{max-width:1000px;margin:auto;padding:0 16px}
+nav{display:flex;align-items:center;gap:8px;padding:12px 0;flex-wrap:wrap}
+.logo{font-weight:800;font-size:1.2rem;color:var(--accent);margin-right:auto}
+nav button{background:none;border:0;color:var(--muted);font:inherit;padding:8px 12px;border-radius:8px;cursor:pointer}
+nav button.on{background:var(--accent2);color:var(--accent);font-weight:600}
+.hero{padding:28px 0 8px}
+.hero h1{margin:0 0 4px;font-size:1.7rem}
+.hero p{margin:0;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:18px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.stat b{font-size:1.5rem;display:block;color:var(--accent)}
+.stat span{color:var(--muted);font-size:.85rem}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 16px}
+input,select,textarea{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 11px;width:100%}
+.tools input{flex:2;min-width:180px}.tools select{flex:1;min-width:130px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding-bottom:30px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.card h3{margin:0;font-size:1.05rem}
+.tag{align-self:flex-start;background:var(--accent2);color:var(--accent);font-size:.75rem;font-weight:600;padding:2px 10px;border-radius:99px}
+.meta{color:var(--muted);font-size:.88rem}
+.bar{height:6px;background:var(--border);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+.btn.sec{background:var(--accent2);color:var(--accent)}
+.btn.del{background:none;color:var(--bad);border:1px solid var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin:16px 0}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.form label{font-size:.85rem;color:var(--muted);display:block;margin-bottom:3px}
+.full{grid-column:1/-1}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);font-size:.9rem}
+th{color:var(--muted);font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:9}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:8}
+.modal.show{display:flex}
+.modal .panel{width:100%;max-width:440px;margin:0;max-height:90%;overflow:auto}
+.empty{color:var(--muted);text-align:center;padding:40px 0}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><div class="wrap"><nav>
+<div class="logo">🎓 CampusEvents</div>
+<button data-v="events" class="on">Events</button>
+<button data-v="my">My Registrations</button>
+<button data-v="admin">Admin</button>
+</nav></div></header>
+
+<main class="wrap">
+<section id="events">
+<div class="hero"><h1>Discover campus events</h1><p>Browse, register and track everything happening in college.</p></div>
+<div class="stats" id="stats"></div>
+<div class="tools">
+<input id="q" placeholder="Search events, venues, departments…">
+<select id="cat"></select>
+<select id="sort"><option value="date">Soonest first</option><option value="seats">Most seats left</option></select>
+</div>
+<div class="grid" id="list"></div>
+</section>
+
+<section id="my" class="hide">
+<div class="hero"><h1>My registrations</h1><p>Events you have signed up for.</p></div>
+<div class="panel scroll"><table><thead><tr><th>Event</th><th>Date</th><th>Name</th><th>Roll No.</th><th></th></tr></thead><tbody id="regs"></tbody></table></div>
+</section>
+
+<section id="admin" class="hide">
+<div class="hero"><h1>Admin dashboard</h1><p>Create events and view attendees. Admin PIN: <b>1234</b></p></div>
+<div class="panel" id="lock">
+<div class="form"><div><label>Admin PIN</label><input id="pin" type="password" placeholder="Enter PIN"></div>
+<div style="align-self:end"><button class="btn" id="unlock">Unlock</button></div></div>
+</div>
+<div id="adminBody" class="hide">
+<div class="panel"><h3 style="margin-top:0" id="fTitle">Add new event</h3>
+<div class="form">
+<div class="full"><label>Title</label><input id="fT"></div>
+<div><label>Category</label><select id="fC"><option>Technical</option><option>Cultural</option><option>Sports</option><option>Workshop</option><option>Seminar</option></select></div>
+<div><label>Department / Club</label><input id="fD"></div>
+<div><label>Date</label><input id="fDate" type="date"></div>
+<div><label>Time</label><input id="fTime" type="time"></div>
+<div><label>Venue</label><input id="fV"></div>
+<div><label>Capacity</label><input id="fCap" type="number" min="1" value="100"></div>
+<div class="full"><label>Description</label><textarea id="fDesc" rows="3"></textarea></div>
+<div class="full row"><button class="btn" id="save">Save event</button><button class="btn sec" id="cancel">Clear</button></div>
+</div></div>
+<div class="panel scroll"><h3 style="margin-top:0">Manage events</h3>
+<table><thead><tr><th>Event</th><th>Date</th><th>Registered</th><th></th></tr></thead><tbody id="adm"></tbody></table></div>
+</div>
+</section>
+</main>
+
+<div class="modal" id="modal"><div class="panel">
+<h3 style="margin-top:0" id="mTitle"></h3>
+<div class="form">
+<div class="full"><label>Full name</label><input id="rN"></div>
+<div><label>Roll number</label><input id="rR"></div>
+<div><label>Department</label><input id="rD"></div>
+<div class="full"><label>Email</label><input id="rE" type="email"></div>
+<div class="full row"><button class="btn" id="rGo">Confirm registration</button><button class="btn sec" id="rX">Cancel</button></div>
+</div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const KEY='campus_events_v1';
+const seed={events:[
+{id:1,title:'HackSprint 2026',cat:'Technical',dept:'CSE',date:'2026-10-24',time:'09:00',venue:'Main Auditorium',cap:120,desc:'24-hour national-level hackathon. Build, pitch and win prizes.'},
+{id:2,title:'Rhythm – Cultural Fest',cat:'Cultural',dept:'Cultural Club',date:'2026-11-05',time:'17:30',venue:'Open Air Theatre',cap:400,desc:'Dance, music and drama performances from across departments.'},
+{id:3,title:'Inter-Department Cricket',cat:'Sports',dept:'Sports Council',date:'2026-10-18',time:'08:00',venue:'College Ground',cap:60,desc:'Knockout cricket tournament. Teams of 11 plus substitutes.'},
+{id:4,title:'Edge AI Workshop',cat:'Workshop',dept:'AI & DS',date:'2026-10-30',time:'10:00',venue:'Lab Block 2',cap:40,desc:'Hands-on session on deploying vision models on edge devices.'},
+{id:5,title:'Career Guidance Seminar',cat:'Seminar',dept:'Placement Cell',date:'2026-11-12',time:'14:00',venue:'Seminar Hall A',cap:200,desc:'Industry experts share resume, interview and higher-study tips.'}],
+regs:[],next:6};
+let db;
+try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!db||!db.events)db=JSON.parse(JSON.stringify(seed));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
+let admin=false,editId=null,regFor=null;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cnt=id=>db.regs.filter(r=>r.eid===id).length;
+const fmt=(d,t)=>{const x=new Date(d+'T'+(t||'00:00'));return isNaN(x)?d:x.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})+(t?' · '+x.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}):'')};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+
+function render(){
+ const cats=['All',...new Set(db.events.map(e=>e.cat))];
+ const cur=$('#cat').value||'All';
+ $('#cat').innerHTML=cats.map(c=>`<option ${c===cur?'selected':''}>${esc(c)}</option>`).join('');
+ const q=$('#q').value.toLowerCase(),c=$('#cat').value;
+ let L=db.events.filter(e=>(c==='All'||e.cat===c)&&(e.title+e.venue+e.dept+e.desc).toLowerCase().includes(q));
+ L.sort($('#sort').value==='seats'?(a,b)=>(b.cap-cnt(b.id))-(a.cap-cnt(a.id)):(a,b)=>a.date.localeCompare(b.date));
+ $('#stats').innerHTML=[['Events',db.events.length],['Registrations',db.regs.length],['Categories',cats.length-1],['Seats left',db.events.reduce((s,e)=>s+Math.max(0,e.cap-cnt(e.id)),0)]].map(([k,v])=>`<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
+ $('#list').innerHTML=L.length?L.map(e=>{const n=cnt(e.id),left=e.cap-n,full=left<=0;
+  return `<div class="card"><span class="tag">${esc(e.cat)}</span><h3>${esc(e.title)}</h3>
+  <div class="meta">📅 ${fmt(e.date,e.time)}<br>📍 ${esc(e.venue)} · ${esc(e.dept)}</div>
+  <div>${esc(e.desc)}</div>
+  <div class="bar"><i style="width:${Math.min(100,n/e.cap*100)}%"></i></div>
+  <div class="meta">${full?'Fully booked':left+' of '+e.cap+' seats left'}</div>
+  <div class="row"><button class="btn" ${full?'disabled':''} onclick="openReg(${e.id})">${full?'Full':'Register'}</button></div></div>`}).join(''):'<div class="empty" style="grid-column:1/-1">No events match your search.</div>';
+ $('#regs').innerHTML=db.regs.length?db.regs.map((r,i)=>{const e=db.events.find(x=>x.id===r.eid);return `<tr><td>${e?esc(e.title):'(removed)'}</td><td>${e?esc(e.date):''}</td><td>${esc(r.name)}</td><td>${esc(r.roll)}</td><td><button class="btn del" onclick="cancelReg(${i})">Cancel</button></td></tr>`}).join(''):'<tr><td colspan="5" class="empty">No registrations yet.</td></tr>';
+ $('#adm').innerHTML=db.events.map(e=>`<tr><td>${esc(e.title)}</td><td>${esc(e.date)}</td><td>${cnt(e.id)} / ${e.cap}</td><td class="row" style="margin:0"><button class="btn sec" onclick="editEv(${e.id})">Edit</button><button class="btn del" onclick="delEv(${e.id})">Delete</button></td></tr>`).join('');
+}
+function openReg(id){regFor=id;const e=db.events.find(x=>x.id===id);$('#mTitle').textContent='Register: '+e.title;$('#modal').classList.add('show')}
+$('#rX').onclick=()=>$('#modal').classList.remove('show');
+$('#rGo').onclick=()=>{
+ const name=$('#rN').value.trim(),roll=$('#rR').value.trim(),dept=$('#rD').value.trim(),email=$('#rE').value.trim();
+ if(!name||!roll||!/^\S+@\S+\.\S+$/.test(email))return toast('Enter name, roll number and a valid email');
+ if(db.regs.some(r=>r.eid===regFor&&r.roll.toLowerCase()===roll.toLowerCase()))return toast('Already registered for this event');
+ const e=db.events.find(x=>x.id===regFor);if(cnt(regFor)>=e.cap)return toast('Sorry, event is full');
+ db.regs.push({eid:regFor,name,roll,dept,email});save();
+ ['rN','rR','rD','rE'].forEach(i=>$('#'+i).value='');
+ $('#modal').classList.remove('show');render();toast('Registered successfully ✔');
+};
+function cancelReg(i){db.regs.splice(i,1);save();render();toast('Registration cancelled')}
+$('#unlock').onclick=()=>{if($('#pin').value==='1234'){admin=true;$('#lock').classList.add('hide');$('#adminBody').classList.remove('hide')}else toast('Wrong PIN')};
+function clearForm(){editId=null;['fT','fD','fDate','fTime','fV','fDesc'].forEach(i=>$('#'+i).value='');$('#fCap').value=100;$('#fTitle').textContent='Add new event'}
+$('#cancel').onclick=clearForm;
+$('#save').onclick=()=>{
+ const o={title:$('#fT').value.trim(),cat:$('#fC').value,dept:$('#fD').value.trim()||'General',date:$('#fDate').value,time:$('#fTime').value,venue:$('#fV').value.trim(),cap:parseInt($('#fCap').value)||0,desc:$('#fDesc').value.trim()};
+ if(!o.title||!o.date||!o.venue||o.cap<1)return toast('Title, date, venue and capacity are required');
+ if(editId){Object.assign(db.events.find(e=>e.id===editId),o)}else{o.id=db.next++;db.events.push(o)}
+ save();clearForm();render();toast('Event saved ✔');
+};
+function editEv(id){const e=db.events.find(x=>x.id===id);editId=id;
+ $('#fT').value=e.title;$('#fC').value=e.cat;$('#fD').value=e.dept;$('#fDate').value=e.date;$('#fTime').value=e.time;$('#fV').value=e.venue;$('#fCap').value=e.cap;$('#fDesc').value=e.desc;
+ $('#fTitle').textContent='Edit event';scrollTo({top:0,behavior:'smooth'})}
+function delEv(id){if(!confirm('Delete this event and its registrations?'))return;db.events=db.events.filter(e=>e.id!==id);db.regs=db.regs.filter(r=>r.eid!==id);save();render()}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+ ['events','my','admin'].forEach(v=>$('#'+v).classList.toggle('hide',v!==b.dataset.v));
+});
+['q','cat','sort'].forEach(i=>$('#'+i).addEventListener('input',render));
+render();
+</script>
+</body>
+</html>
